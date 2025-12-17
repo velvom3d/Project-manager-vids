@@ -4,35 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Upload Preview</title>
-    <script>
-        let previewImage = null;
-
-        function handleImageSelect(event) {
-            const file = event.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    if (!previewImage) {
-                        previewImage = document.createElement('img');
-                        previewImage.style.maxWidth = '300px';
-                        previewImage.style.marginTop = '10px';
-                        document.body.appendChild(previewImage);
-                    }
-                    previewImage.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                if (previewImage) {
-                    document.body.removeChild(previewImage);
-                    previewImage = null;
-                }
-                alert('Please select a valid image file.');
-            }
-        }
-    </script>
 </head>
 <body>
     <h1>Upload your image</h1>
-    <input type="file" accept="image/*" id="imageInput" onchange="handleImageSelect(event)">
+    <input type="file" accept="image/*" id="imageInput">
+    <div id="preview-container"></div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const previewContainer = document.getElementById('preview-container');
+
+        imageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+
+            if (!file) return;
+
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // Clear any existing preview
+                    previewContainer.innerHTML = '';
+
+                    // Create new image element
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = 'Image preview';
+                    img.style.maxWidth = '300px';
+                    img.style.marginTop = '10px';
+                    img.style.display = 'block';
+
+                    previewContainer.appendChild(img);
+                };
+
+                reader.onerror = function() {
+                    alert('Error reading file.');
+                };
+
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.innerHTML = '';
+                alert('Please select a valid image file.');
+            }
+        });
+    </script>
 </body>
 </html>
