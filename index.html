@@ -139,6 +139,7 @@
     .status-printing { background: #3b82f6; animation: pulse 2s infinite; }
     .status-completed { background: #10b981; }
     .status-delivered { background: #8b5cf6; }
+    .status-personal { background: #ec4899; }
 
     @keyframes pulse {
       0%, 100% { opacity: 1; }
@@ -468,7 +469,8 @@
         pending: { label: 'Pending', dot: 'status-pending' },
         printing: { label: 'Printing', dot: 'status-printing' },
         completed: { label: 'Completed', dot: 'status-completed' },
-        delivered: { label: 'Delivered', dot: 'status-delivered' }
+        delivered: { label: 'Delivered', dot: 'status-delivered' },
+        personal: { label: 'Personal', dot: 'status-personal' }
       };
 
       const filteredProjects = filter === 'all' ? projects : projects.filter(p => p.status === filter);
@@ -477,7 +479,8 @@
         pending: projects.filter(p => p.status === 'pending').length,
         printing: projects.filter(p => p.status === 'printing').length,
         completed: projects.filter(p => p.status === 'completed').length,
-        delivered: projects.filter(p => p.status === 'delivered').length
+        delivered: projects.filter(p => p.status === 'delivered').length,
+        personal: projects.filter(p => p.status === 'personal').length
       };
 
       /* ---------- LOADING SCREEN ---------- */
@@ -580,7 +583,7 @@
           e('div', { className: 'max-w-7xl mx-auto px-6 py-4 flex items-center justify-between' },
             e('div', { className: 'font-display text-2xl tracking-wider' }, 'VIDS'),
             e('nav', { className: 'hidden md:flex items-center gap-8' },
-              ['all', 'pending', 'printing', 'completed', 'delivered'].map(f =>
+              ['all', 'pending', 'printing', 'completed', 'delivered', 'personal'].map(f =>
                 e('button', {
                   key: f,
                   onClick: () => setFilter(f),
@@ -606,21 +609,21 @@
         // Hero Section
         e('section', { className: 'pt-32 pb-16 px-6' },
           e('div', { className: 'max-w-7xl mx-auto' },
-            e('h1', { className: 'font-display hero-text reveal' }, 'YOUR'),
-            e('h1', { className: 'font-display hero-text reveal reveal-delay-1' }, 'PROJECTS'),
+            e('h1', { className: 'font-display hero-text reveal' }, 'PROJECTS'),
             e('div', { className: 'line-decoration my-8 reveal reveal-delay-2' })
           )
         ),
 
         // Stats
         e('section', { className: 'px-6 pb-16' },
-          e('div', { className: 'max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-0' },
+          e('div', { className: 'max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-6 gap-0' },
             [
               { label: 'Total', value: stats.total },
               { label: 'Pending', value: stats.pending },
               { label: 'Printing', value: stats.printing },
               { label: 'Completed', value: stats.completed },
-              { label: 'Delivered', value: stats.delivered }
+              { label: 'Delivered', value: stats.delivered },
+              { label: 'Personal', value: stats.personal }
             ].map((s, i) => e('div', {
               key: s.label,
               className: 'stat-card pl-6 py-6 reveal',
@@ -635,7 +638,7 @@
         // Mobile Filter
         e('div', { className: 'md:hidden px-6 pb-8 overflow-x-auto' },
           e('div', { className: 'flex gap-4' },
-            ['all', 'pending', 'printing', 'completed', 'delivered'].map(f =>
+            ['all', 'pending', 'printing', 'completed', 'delivered', 'personal'].map(f =>
               e('button', {
                 key: f,
                 onClick: () => setFilter(f),
@@ -697,7 +700,7 @@
                       onChange: ev => updateStatus(p.id, ev.target.value),
                       className: 'flex-1 bg-transparent border border-white/10 p-3 text-sm text-white rounded clickable'
                     },
-                      ['pending', 'printing', 'completed', 'delivered'].map(s =>
+                      ['pending', 'printing', 'completed', 'delivered', 'personal'].map(s =>
                         e('option', { key: s, value: s, className: 'bg-black' }, s.charAt(0).toUpperCase() + s.slice(1))
                       )
                     ),
@@ -730,7 +733,10 @@
 
         // Footer Marquee
         e('footer', { className: 'border-t border-white/5 py-4 overflow-hidden' },
-          e('div', { className: 'marquee whitespace-nowrap' },
+          e('div', { className: 'marquee whitespace-nowrap inline-flex' },
+            e('span', { className: 'inline-block text-gray-700 font-display text-xl tracking-widest mx-8' },
+              'PRECISION • QUALITY • INNOVATION • VIDS 3D PRINT • PRECISION • QUALITY • INNOVATION • VIDS 3D PRINT • '
+            ),
             e('span', { className: 'inline-block text-gray-700 font-display text-xl tracking-widest mx-8' },
               'PRECISION • QUALITY • INNOVATION • VIDS 3D PRINT • PRECISION • QUALITY • INNOVATION • VIDS 3D PRINT • '
             )
@@ -836,7 +842,7 @@
                     value: form.status,
                     onChange: ev => setForm({...form, status: ev.target.value})
                   },
-                    ['pending', 'printing', 'completed', 'delivered'].map(s =>
+                    ['pending', 'printing', 'completed', 'delivered', 'personal'].map(s =>
                       e('option', { key: s, value: s, className: 'bg-black' }, s.charAt(0).toUpperCase() + s.slice(1))
                     )
                   )
