@@ -483,6 +483,29 @@
         personal: projects.filter(p => p.status === 'personal').length
       };
 
+      // Revenue calculations
+      const revenue = {
+        total: projects.reduce((sum, p) => sum + (p.cost || 0), 0),
+        pending: projects.filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.cost || 0), 0),
+        printing: projects.filter(p => p.status === 'printing').reduce((sum, p) => sum + (p.cost || 0), 0),
+        completed: projects.filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.cost || 0), 0),
+        delivered: projects.filter(p => p.status === 'delivered').reduce((sum, p) => sum + (p.cost || 0), 0),
+        personal: projects.filter(p => p.status === 'personal').reduce((sum, p) => sum + (p.cost || 0), 0)
+      };
+
+      // This month's revenue
+      const now = new Date();
+      const thisMonth = projects.filter(p => {
+        const created = new Date(p.created_at);
+        return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
+      });
+      const monthlyRevenue = thisMonth.reduce((sum, p) => sum + (p.cost || 0), 0);
+      const monthlyProjects = thisMonth.length;
+
+      // Earned (delivered) vs Pending revenue
+      const earnedRevenue = revenue.delivered;
+      const pendingRevenue = revenue.pending + revenue.printing + revenue.completed;
+
       /* ---------- LOADING SCREEN ---------- */
       if (initialLoad) {
         return e('div', { className: 'loading-screen' },
@@ -607,10 +630,59 @@
         ),
 
         // Hero Section
-        e('section', { className: 'pt-32 pb-16 px-6' },
+        e('section', { className: 'pt-32 pb-8 px-6' },
           e('div', { className: 'max-w-7xl mx-auto' },
             e('h1', { className: 'font-display hero-text reveal' }, 'PROJECTS'),
             e('div', { className: 'line-decoration my-8 reveal reveal-delay-2' })
+          )
+        ),
+
+        // Revenue Dashboard
+        e('section', { className: 'px-6 pb-12' },
+          e('div', { className: 'max-w-7xl mx-auto' },
+            e('div', { className: 'grid grid-cols-1 md:grid-cols-4 gap-4 reveal' },
+              // Total Revenue
+              e('div', { className: 'bg-gradient-to-br from-emerald-500/20 to-emerald-600/5 border border-emerald-500/20 rounded-lg p-6' },
+                e('div', { className: 'flex items-center gap-3 mb-2' },
+                  e('svg', { className: 'w-5 h-5 text-emerald-400', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', strokeWidth: '2' },
+                    e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' })
+                  ),
+                  e('span', { className: 'text-emerald-400 text-xs uppercase tracking-wider' }, 'Total Revenue')
+                ),
+                e('div', { className: 'font-display text-4xl text-white' }, '$', revenue.total.toLocaleString())
+              ),
+              // Earned Revenue
+              e('div', { className: 'bg-gradient-to-br from-purple-500/20 to-purple-600/5 border border-purple-500/20 rounded-lg p-6' },
+                e('div', { className: 'flex items-center gap-3 mb-2' },
+                  e('svg', { className: 'w-5 h-5 text-purple-400', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', strokeWidth: '2' },
+                    e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' })
+                  ),
+                  e('span', { className: 'text-purple-400 text-xs uppercase tracking-wider' }, 'Earned (Delivered)')
+                ),
+                e('div', { className: 'font-display text-4xl text-white' }, '$', earnedRevenue.toLocaleString())
+              ),
+              // Pending Revenue
+              e('div', { className: 'bg-gradient-to-br from-amber-500/20 to-amber-600/5 border border-amber-500/20 rounded-lg p-6' },
+                e('div', { className: 'flex items-center gap-3 mb-2' },
+                  e('svg', { className: 'w-5 h-5 text-amber-400', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', strokeWidth: '2' },
+                    e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' })
+                  ),
+                  e('span', { className: 'text-amber-400 text-xs uppercase tracking-wider' }, 'Pending Revenue')
+                ),
+                e('div', { className: 'font-display text-4xl text-white' }, '$', pendingRevenue.toLocaleString())
+              ),
+              // This Month
+              e('div', { className: 'bg-gradient-to-br from-blue-500/20 to-blue-600/5 border border-blue-500/20 rounded-lg p-6' },
+                e('div', { className: 'flex items-center gap-3 mb-2' },
+                  e('svg', { className: 'w-5 h-5 text-blue-400', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', strokeWidth: '2' },
+                    e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' })
+                  ),
+                  e('span', { className: 'text-blue-400 text-xs uppercase tracking-wider' }, 'This Month')
+                ),
+                e('div', { className: 'font-display text-4xl text-white' }, '$', monthlyRevenue.toLocaleString()),
+                e('div', { className: 'text-gray-500 text-xs mt-1' }, monthlyProjects, ' projects')
+              )
+            )
           )
         ),
 
