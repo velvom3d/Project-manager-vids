@@ -296,6 +296,8 @@
       const [form, setForm] = useState({ client:'', project:'', company:'', contact:'', cost:'', status:'pending', note:'' });
       const [imageFile, setImageFile] = useState(null);
       const [imagePreview, setImagePreview] = useState(null);
+      const [modelFile, setModelFile] = useState(null);
+      const [modelFileName, setModelFileName] = useState(null);
       const [notification, setNotification] = useState(null);
       const [filter, setFilter] = useState('all');
       const modalRef = useRef(null);
@@ -402,6 +404,40 @@
         }
       }
 
+      /* ---------- 3D FILE HANDLING ---------- */
+      function handleModelSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const validExtensions = ['.stl', '.step', '.stp', '.obj', '.3mf'];
+          const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+          if (validExtensions.includes(fileExt)) {
+            setModelFile(file);
+            setModelFileName(file.name);
+          } else {
+            showNotification('Please select a valid 3D file (STL, STEP, OBJ, 3MF)', 'error');
+          }
+        }
+      }
+
+      function clearModelFile(event) {
+        event.stopPropagation();
+        setModelFile(null);
+        setModelFileName(null);
+      }
+
+      async function uploadModelFile(file) {
+        if (!file || !client) return null;
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        const { error } = await client.storage.from('project-models').upload(fileName, file);
+        if (error) {
+          showNotification('3D file upload failed', 'error');
+          return null;
+        }
+        const { data: urlData } = client.storage.from('project-models').getPublicUrl(fileName);
+        return urlData.publicUrl;
+      }
+
       async function uploadImage(file) {
         if (!file || !client) return null;
         const fileExt = file.name.split('.').pop();
@@ -423,6 +459,9 @@
         let imageUrl = null;
         if (imageFile) imageUrl = await uploadImage(imageFile);
 
+        let modelUrl = null;
+        if (modelFile) modelUrl = await uploadModelFile(modelFile);
+
         const { error } = await client.from('projects').insert({
           client_name: form.client,
           project_name: form.project,
@@ -431,13 +470,16 @@
           cost: form.cost ? Number(form.cost) : null,
           status: form.status,
           note: form.note,
-          image_url: imageUrl
+          image_url: imageUrl,
+          model_url: modelUrl
         });
         if (error) return showNotification(error.message, 'error');
         setShowModal(false);
         setForm({ client:'', project:'', company:'', contact:'', cost:'', status:'pending', note:'' });
         setImageFile(null);
         setImagePreview(null);
+        setModelFile(null);
+        setModelFileName(null);
         showNotification('Project created', 'success');
       }
 
@@ -765,6 +807,18 @@
                   p.company && e('p', { className: 'text-gray-600 text-sm mb-3' }, p.company),
                   p.note && e('p', { className: 'text-gray-500 text-sm italic line-clamp-2 mb-4' }, p.note),
 
+                  // 3D File indicator
+                  p.model_url && e('a', {
+                    href: p.model_url,
+                    target: '_blank',
+                    className: 'inline-flex items-center gap-2 text-cyan-400 text-xs mb-4 hover:text-cyan-300 transition-colors'
+                  },
+                    e('svg', { viewBox: '0 0 24 24', className: 'w-4 h-4', fill: 'none', stroke: 'currentColor', strokeWidth: '2' },
+                      e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z' })
+                    ),
+                    e('span', null, 'Download 3D File')
+                  ),
+
                   // Actions
                   e('div', { className: 'flex gap-3 pt-4 border-t border-white/5' },
                     e('select', {
@@ -859,6 +913,39 @@
                       accept: 'image/*',
                       onChange: handleImageSelect,
                       className: 'text-white'
+                    })
+                  )
+            ),
+
+            // 3D File Upload
+            e('div', { className: 'mb-8' },
+              modelFileName
+                ? e('div', { className: 'border border-dashed border-cyan-500/30 bg-cyan-500/5 p-6 text-center relative rounded-lg' },
+                    e('svg', { viewBox: '0 0 24 24', className: 'w-10 h-10 mx-auto mb-2 text-cyan-400', fill: 'none', stroke: 'currentColor', strokeWidth: '1.5' },
+                      e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z' })
+                    ),
+                    e('p', { className: 'text-cyan-400 text-sm font-medium' }, modelFileName),
+                    e('p', { className: 'text-gray-500 text-xs mt-1' }, '3D file ready to upload'),
+                    e('button', {
+                      type: 'button',
+                      onClick: clearModelFile,
+                      className: 'absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors'
+                    },
+                      e('svg', { className: 'w-4 h-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', strokeWidth: '2' },
+                        e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M6 18L18 6M6 6l12 12' })
+                      )
+                    )
+                  )
+                : e('div', { className: 'border border-dashed border-white/20 p-6 text-center' },
+                    e('svg', { viewBox: '0 0 24 24', className: 'w-10 h-10 mx-auto mb-2 text-gray-500', fill: 'none', stroke: 'currentColor', strokeWidth: '1' },
+                      e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z' })
+                    ),
+                    e('p', { className: 'text-sm text-gray-500 mb-3' }, 'Upload 3D file (STL, STEP, OBJ, 3MF)'),
+                    e('input', {
+                      type: 'file',
+                      accept: '.stl,.step,.stp,.obj,.3mf',
+                      onChange: handleModelSelect,
+                      className: 'text-white text-sm'
                     })
                   )
             ),
