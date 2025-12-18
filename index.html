@@ -649,7 +649,7 @@
                   ),
                   e('span', { className: 'text-emerald-400 text-xs uppercase tracking-wider' }, 'Total Revenue')
                 ),
-                e('div', { className: 'font-display text-4xl text-white' }, '$', revenue.total.toLocaleString())
+                e('div', { className: 'font-display text-4xl text-white' }, '₹', revenue.total.toLocaleString('en-IN'))
               ),
               // Earned Revenue
               e('div', { className: 'bg-gradient-to-br from-purple-500/20 to-purple-600/5 border border-purple-500/20 rounded-lg p-6' },
@@ -659,7 +659,7 @@
                   ),
                   e('span', { className: 'text-purple-400 text-xs uppercase tracking-wider' }, 'Earned (Delivered)')
                 ),
-                e('div', { className: 'font-display text-4xl text-white' }, '$', earnedRevenue.toLocaleString())
+                e('div', { className: 'font-display text-4xl text-white' }, '₹', earnedRevenue.toLocaleString('en-IN'))
               ),
               // Pending Revenue
               e('div', { className: 'bg-gradient-to-br from-amber-500/20 to-amber-600/5 border border-amber-500/20 rounded-lg p-6' },
@@ -669,7 +669,7 @@
                   ),
                   e('span', { className: 'text-amber-400 text-xs uppercase tracking-wider' }, 'Pending Revenue')
                 ),
-                e('div', { className: 'font-display text-4xl text-white' }, '$', pendingRevenue.toLocaleString())
+                e('div', { className: 'font-display text-4xl text-white' }, '₹', pendingRevenue.toLocaleString('en-IN'))
               ),
               // This Month
               e('div', { className: 'bg-gradient-to-br from-blue-500/20 to-blue-600/5 border border-blue-500/20 rounded-lg p-6' },
@@ -679,7 +679,7 @@
                   ),
                   e('span', { className: 'text-blue-400 text-xs uppercase tracking-wider' }, 'This Month')
                 ),
-                e('div', { className: 'font-display text-4xl text-white' }, '$', monthlyRevenue.toLocaleString()),
+                e('div', { className: 'font-display text-4xl text-white' }, '₹', monthlyRevenue.toLocaleString('en-IN')),
                 e('div', { className: 'text-gray-500 text-xs mt-1' }, monthlyProjects, ' projects')
               )
             )
@@ -760,7 +760,7 @@
                       e('h3', { className: 'font-display text-2xl text-white' }, p.project_name),
                       e('p', { className: 'text-gray-500 text-sm mt-1' }, p.client_name)
                     ),
-                    p.cost && e('div', { className: 'text-white font-medium' }, '$', p.cost)
+                    p.cost && e('div', { className: 'text-white font-medium' }, '₹', p.cost.toLocaleString('en-IN'))
                   ),
                   p.company && e('p', { className: 'text-gray-600 text-sm mb-3' }, p.company),
                   p.note && e('p', { className: 'text-gray-500 text-sm italic line-clamp-2 mb-4' }, p.note),
@@ -899,7 +899,7 @@
                   })
                 ),
                 e('div', null,
-                  e('label', { className: 'text-xs text-gray-500 uppercase tracking-wider mb-2 block' }, 'Cost ($)'),
+                  e('label', { className: 'text-xs text-gray-500 uppercase tracking-wider mb-2 block' }, 'Cost (₹)'),
                   e('input', {
                     type: 'number',
                     className: 'input-minimal w-full py-3 text-white',
